@@ -5,6 +5,8 @@ import plotly.express as px
 from fpdf import FPDF
 import io
 
+st.set_page_config(page_title="Simplify", layout="wide")
+
 # Suporte multilíngue
 langs = {
     "fr": {
