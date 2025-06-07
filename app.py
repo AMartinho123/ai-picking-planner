@@ -193,3 +193,32 @@ colunas_traduzidas = {
 df_exibicao = df_hoje.rename(columns={col: colunas_traduzidas.get(col, col) for col in df_hoje.columns})
 
 st.dataframe(df_exibicao)
+
+# Métricas principais
+col1, col2 = st.columns(2)
+with col1:
+    total = df_hoje["pedidos"].sum() if "pedidos" in df_hoje else 0
+    st.metric(label=l["total_orders"], value=int(total))
+with col2:
+    sla = df_hoje["SLA_real"].mean() if "SLA_real" in df_hoje else 0
+    st.metric(label=l["sla_avg"], value=f"{sla:.1f}%")
+
+# Gráfico de produtividade
+if not df_hoje.empty:
+    st.subheader(l["prod_title"])
+    fig = px.bar(df_hoje, x="operador", y="produtividade", color="operador",
+                 labels={"produtividade": l["col_rate"], "operador": l["col_operator"]})
+    st.plotly_chart(fig, use_container_width=True)
+
+# Recomendações
+if not df_hoje.empty:
+    st.subheader(l["reco_title"])
+    media = df_hoje["produtividade"].mean()
+    for _, row in df_hoje.iterrows():
+        dif = ((row["produtividade"] - media) / media) * 100 if media > 0 else 0
+        if dif < -10:
+            st.write(l["below_avg"].format(op=row["operador"], val=abs(dif)))
+        elif dif > 10:
+            st.write(l["above_avg"].format(op=row["operador"], val=dif))
+        else:
+            st.write(l["in_avg"].format(op=row["operador"]))
