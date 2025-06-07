@@ -85,9 +85,7 @@ def gerar_relatorio_pdf(df, recomendacoes):
     pdf.set_font("Arial", size=12)
     for rec in recomendacoes:
         texto_limpo = rec.encode("ascii", "ignore").decode()
-        # Evita erro de largura insuficiente quebrando em palavras menores
-        for linha in texto_limpo.split():
-            pdf.cell(0, 10, linha, ln=True)
+        pdf.multi_cell(190, 10, texto_limpo)  # largura ajustada
 
     buffer = io.BytesIO()
     pdf.output(buffer)
