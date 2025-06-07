@@ -248,8 +248,10 @@ if not df_hoje.empty:
         pdf.set_font("Arial", 'B', 10)
         pdf.cell(0, 10, l["reco_label"], ln=True)
         pdf.set_font("Arial", '', 10)
+        import unicodedata
         for rec in recomendacoes:
-            pdf.multi_cell(0, 10, rec)
+            texto_limpo = unicodedata.normalize('NFKD', rec).encode('ASCII', 'ignore').decode('ASCII')
+            pdf.multi_cell(0, 10, texto_limpo)
 
         buffer = io.BytesIO()
         pdf.output(buffer)
