@@ -192,7 +192,10 @@ colunas_traduzidas = {
 }
 df_exibicao = df_hoje.rename(columns={col: colunas_traduzidas.get(col, col) for col in df_hoje.columns})
 
-st.dataframe(df_exibicao)
+if df_hoje.empty:
+    st.warning("Nenhum dado disponível com os filtros selecionados.")
+else:
+    st.dataframe(df_exibicao)
 
 # Métricas principais
 col1, col2 = st.columns(2)
