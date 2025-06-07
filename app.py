@@ -186,12 +186,13 @@ with st.expander("🔍 Filtrar dados"):
     operadores_disponiveis = df["operador"].unique() if "operador" in df.columns else []
     zonas_disponiveis = df["zona"].unique() if "zona" in df.columns else []
 
-    data_filtro = col_f1.selectbox("Data", options=sorted(datas_disponiveis), format_func=lambda x: x.strftime('%d/%m/%Y') if isinstance(x, datetime.date) else x)
+    data_filtro = col_f1.selectbox("Data", options=['Todos'] + sorted(datas_disponiveis), format_func=lambda x: x.strftime('%d/%m/%Y') if isinstance(x, datetime.date) else x), format_func=lambda x: x.strftime('%d/%m/%Y') if isinstance(x, datetime.date) else x)
     operador_filtro = col_f2.multiselect("Operador", options=operadores_disponiveis, default=operadores_disponiveis)
     zona_filtro = col_f3.multiselect("Zona", options=zonas_disponiveis, default=zonas_disponiveis)
 
     df_hoje = df.copy()
-    df_hoje = df_hoje[df_hoje["data"].dt.date == data_filtro]
+    if data_filtro != 'Todos':
+        df_hoje = df_hoje[df_hoje["data"].dt.date == data_filtro]
     df_hoje = df_hoje[df_hoje["operador"].isin(operador_filtro)]
     df_hoje = df_hoje[df_hoje["zona"].isin(zona_filtro)]
 
@@ -290,5 +291,5 @@ if not df_hoje.empty:
         return buffer
 
     pdf_buffer = gerar_relatorio_pdf(df_hoje, recomendacoes)
-    file_name = f"relatorio_{lang_code}_{data_filtro.strftime('%Y-%m-%d')}.pdf"
+    file_name = f"relatorio_{lang_code}_{data_filtro.strftime('%Y-%m-%d') if isinstance(data_filtro, datetime.date) else 'todos'}.pdf"
     st.download_button(label=l["download_pdf"], data=pdf_buffer, file_name=file_name, mime="application/pdf")
