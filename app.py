@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import datetime
 import plotly.express as px
+
 # 🌐 Seletor de idioma
 st.sidebar.markdown("🌐 **Idioma / Language**")
 lang = st.sidebar.selectbox("Escolha / Choose / Kies", options=["pt", "en", "nl"], index=0)
