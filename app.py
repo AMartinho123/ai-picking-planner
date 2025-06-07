@@ -117,7 +117,8 @@ langs = {
     }
 }
 
-lang_code = st.sidebar.selectbox("Idioma / Language", options=list(langs.keys()), format_func=lambda x: {"pt": "Português", "en": "English", "fr": "Français", "nl": "Nederlands", "de": "Deutsch", "es": "Español"}[x])
+
+lang_code = st.sidebar.selectbox("Idioma / Language", options=list(langs.keys()), format_func=lambda x: {"pt": "Português", "en": "English", "fr": "Français", "nl": "Nederlands", "de": "Deutsch", "es": "Español"}[x])), format_func=lambda x: {"pt": "Português", "en": "English", "fr": "Français", "nl": "Nederlands", "de": "Deutsch", "es": "Español"}[x])
 l = langs[lang_code]
 
 # Upload de dados reais
