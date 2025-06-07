@@ -191,3 +191,9 @@ with st.expander("🔍 Filtrar dados"):
         options=["Todos"] + sorted(datas_disponiveis),
         format_func=lambda x: x.strftime("%d/%m/%Y") if isinstance(x, datetime.date) else x
     )
+
+    # Aplicar filtro por data se não for "Todos"
+    if data_filtro != "Todos":
+        df_hoje = df[df["data"].dt.date == data_filtro]
+    else:
+        df_hoje = df.copy()
