@@ -266,8 +266,8 @@ pdf.set_font("Arial", "B", 12)
 pdf.cell(0, 10, l["reco_label"], ln=True)
 pdf.set_font("Arial", "", 10)
 for rec in recomendacoes:
-    texto_limpo = str(rec).replace('
-', ' ').replace('	', ' ')
+    texto_limpo = str(rec).replace("
+", " ").replace("	", " ")
     pdf.multi_cell(0, 10, texto_limpo[:200], align='L')
 
 pdf_buffer = io.BytesIO()
