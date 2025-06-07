@@ -133,3 +133,6 @@ lang_code = st.sidebar.selectbox(
         "es": "Español"
     }[x]
 )
+
+l = langs[lang_code]
+st.title(l["title"])
