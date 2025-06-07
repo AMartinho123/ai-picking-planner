@@ -61,9 +61,10 @@ for _, row in df_hoje.iterrows():
 def gerar_relatorio_pdf(df, recomendacoes):
     pdf = FPDF()
     pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
     pdf.set_font("Arial", size=12)
 
-    pdf.cell(200, 10, txt="Relatorio de Desempenho", ln=True, align='C')
+    pdf.cell(0, 10, txt="Relatorio de Desempenho", ln=True, align='C')
     pdf.ln(10)
 
     pdf.set_font("Arial", 'B', 12)
@@ -81,11 +82,12 @@ def gerar_relatorio_pdf(df, recomendacoes):
 
     pdf.ln(10)
     pdf.set_font("Arial", 'B', 12)
-    pdf.cell(200, 10, txt="Recomendacoes:", ln=True)
+    pdf.cell(0, 10, txt="Recomendacoes:", ln=True)
     pdf.set_font("Arial", size=12)
     for rec in recomendacoes:
         texto_limpo = rec.encode("ascii", "ignore").decode()
-        pdf.multi_cell(190, 10, texto_limpo)  # largura ajustada
+        pdf.multi_cell(0, 10, texto_limpo, align='L')
+        pdf.ln(1)
 
     buffer = io.BytesIO()
     pdf.output(buffer)
