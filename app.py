@@ -57,6 +57,7 @@ for _, row in df_hoje.iterrows():
     recomendacoes.append(msg)
 
 # Funcao para gerar o PDF sem acentos/emojis
+
 def gerar_relatorio_pdf(df, recomendacoes):
     pdf = FPDF()
     pdf.add_page()
@@ -84,7 +85,9 @@ def gerar_relatorio_pdf(df, recomendacoes):
     pdf.set_font("Arial", size=12)
     for rec in recomendacoes:
         texto_limpo = rec.encode("ascii", "ignore").decode()
-        pdf.multi_cell(0, 10, texto_limpo)
+        # Evita erro de largura insuficiente quebrando em palavras menores
+        for linha in texto_limpo.split():
+            pdf.cell(0, 10, linha, ln=True)
 
     buffer = io.BytesIO()
     pdf.output(buffer)
