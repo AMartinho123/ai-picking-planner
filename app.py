@@ -126,4 +126,5 @@ def gerar_relatorio_pdf(df, recomendacoes):
     buffer.seek(0)
     return buffer
 
+pdf_buffer = gerar_relatorio_pdf(df_hoje, recomendacoes)
 st.download_button("📄 Baixar Relatório em PDF", data=pdf_buffer, file_name="relatorio_simplify.pdf", mime="application/pdf")
