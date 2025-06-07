@@ -214,11 +214,47 @@ if not df_hoje.empty:
 if not df_hoje.empty:
     st.subheader(l["reco_title"])
     media = df_hoje["produtividade"].mean()
+    recomendacoes = []
     for _, row in df_hoje.iterrows():
         dif = ((row["produtividade"] - media) / media) * 100 if media > 0 else 0
         if dif < -10:
-            st.write(l["below_avg"].format(op=row["operador"], val=abs(dif)))
+            texto = l["below_avg"].format(op=row["operador"], val=abs(dif))
         elif dif > 10:
-            st.write(l["above_avg"].format(op=row["operador"], val=dif))
+            texto = l["above_avg"].format(op=row["operador"], val=dif)
         else:
-            st.write(l["in_avg"].format(op=row["operador"]))
+            texto = l["in_avg"].format(op=row["operador"])
+        st.write(texto)
+        recomendacoes.append(texto)
+
+    def gerar_relatorio_pdf(df, recomendacoes):
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        data_hoje = datetime.datetime.now()
+        pdf.cell(0, 10, txt=l["report_title"].format(date=data_hoje.strftime('%d/%m/%Y')), ln=True, align='C')
+        pdf.ln(10)
+        pdf.set_font("Arial", 'B', 10)
+        pdf.cell(40, 10, l["col_operator"])
+        pdf.cell(50, 10, l["col_rate"])
+        pdf.cell(40, 10, l["col_sla"])
+        pdf.ln()
+        pdf.set_font("Arial", '', 10)
+        for _, row in df.iterrows():
+            pdf.cell(40, 10, str(row["operador"]))
+            pdf.cell(50, 10, f"{row['produtividade']:.2f}")
+            pdf.cell(40, 10, f"{row['SLA_real']:.1f}%")
+            pdf.ln()
+        pdf.ln(10)
+        pdf.set_font("Arial", 'B', 10)
+        pdf.cell(0, 10, l["reco_label"], ln=True)
+        pdf.set_font("Arial", '', 10)
+        for rec in recomendacoes:
+            pdf.multi_cell(0, 10, rec)
+
+        buffer = io.BytesIO()
+        pdf.output(buffer)
+        buffer.seek(0)
+        return buffer
+
+    pdf_buffer = gerar_relatorio_pdf(df_hoje, recomendacoes)
+    st.download_button(label=l["download_pdf"], data=pdf_buffer, file_name="relatorio.pdf", mime="application/pdf")
