@@ -90,5 +90,40 @@ def gerar_relatorio_pdf(df):
     return buffer
 
 # Botão de download
-pdf_buffer = gerar_relatorio_pdf(df_hoje)
+from fpdf import FPDF
+
+def gerar_relatorio_pdf(df, recomendacoes):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.add_font("DejaVu", "", "DejaVuSans.ttf", uni=True)
+    pdf.set_font("DejaVu", size=12)
+
+    pdf.cell(200, 10, txt="📄 Relatório de Desempenho", ln=True, align='C')
+    pdf.ln(10)
+
+    pdf.set_font("DejaVu", 'B', 12)
+    pdf.cell(60, 10, "Operador", 1)
+    pdf.cell(60, 10, "Pedidos/Minuto", 1)
+    pdf.cell(60, 10, "SLA Real (%)", 1)
+    pdf.ln()
+
+    pdf.set_font("DejaVu", "", 12)
+    for _, row in df.iterrows():
+        pdf.cell(60, 10, str(row['operador']), 1)
+        pdf.cell(60, 10, f"{row['produtividade']:.2f}", 1)
+        pdf.cell(60, 10, f"{row['SLA_real']:.2f}", 1)
+        pdf.ln()
+
+    pdf.ln(10)
+    pdf.set_font("DejaVu", 'B', 12)
+    pdf.cell(200, 10, txt="🧠 Recomendações:", ln=True)
+    pdf.set_font("DejaVu", "", 12)
+    for rec in recomendacoes:
+        pdf.multi_cell(0, 10, rec)
+
+    buffer = io.BytesIO()
+    pdf.output(buffer)
+    buffer.seek(0)
+    return buffer
+
 st.download_button("📄 Baixar Relatório em PDF", data=pdf_buffer, file_name="relatorio_simplify.pdf", mime="application/pdf")
