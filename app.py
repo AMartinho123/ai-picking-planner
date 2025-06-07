@@ -38,4 +38,25 @@ df_prev = media_por_dia[media_por_dia["dia_semana"] == dia_amanha]
 
 st.write(f"Previsão para {dia_amanha}:")
 st.dataframe(df_prev.rename(columns={"zona": "Zona", "pedidos": "Pedidos esperados"}), use_container_width=True)
+st.subheader("📊 Produtividade por operador (pedidos por minuto)")
+
+# Cálculo de produtividade
+df_hoje["produtividade"] = df_hoje["pedidos"] / df_hoje["tempo_min"]
+
+# Mostrar ranking
+st.bar_chart(df_hoje.set_index("operador")["produtividade"])
+
+# Recomendações em texto
+st.subheader("🧠 Recomendações automáticas")
+
+media_geral = df_hoje["produtividade"].mean()
+
+for _, row in df_hoje.iterrows():
+    diff = (row["produtividade"] - media_geral) / media_geral * 100
+    if diff < -15:
+        st.error(f"🚨 Operador {row['operador']} está com produtividade {abs(diff):.1f}% abaixo da média.")
+    elif diff > 15:
+        st.success(f"✅ Operador {row['operador']} está com produtividade {diff:.1f}% acima da média.")
+    else:
+        st.info(f"ℹ️ Operador {row['operador']} está dentro da média.")
 
