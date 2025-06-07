@@ -190,6 +190,8 @@ with st.expander("🔍 Filtrar dados"):
         "Data",
         options=["Todos"] + sorted(datas_disponiveis),
         format_func=lambda x: x.strftime("%d/%m/%Y") if isinstance(x, datetime.date) else x
+    ),
+        format_func=lambda x: x.strftime("%d/%m/%Y") if isinstance(x, datetime.date) else x
     ), format_func=lambda x: x.strftime('%d/%m/%Y') if isinstance(x, datetime.date) else x), format_func=lambda x: x.strftime('%d/%m/%Y') if isinstance(x, datetime.date) else x)
     operador_filtro = col_f2.multiselect("Operador", options=operadores_disponiveis, default=operadores_disponiveis)
     zona_filtro = col_f3.multiselect("Zona", options=zonas_disponiveis, default=zonas_disponiveis)
