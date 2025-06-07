@@ -154,11 +154,25 @@ else:
     if ext == "csv":
         df = pd.read_csv(uploaded_file)
         df.columns = [col.strip().lower() for col in df.columns]
+        renomear = {
+            "sla_real": "SLA_real",
+            "operador": "operador",
+            "tempo_min": "tempo_min",
+            "produtividade": "produtividade"
+        }
+        df = df.rename(columns=renomear)
         if "operador" in df.columns:
             df["operador"] = df["operador"].astype(str).str.strip()
     else:
         df = pd.read_excel(uploaded_file)
         df.columns = [col.strip().lower() for col in df.columns]
+        renomear = {
+            "sla_real": "SLA_real",
+            "operador": "operador",
+            "tempo_min": "tempo_min",
+            "produtividade": "produtividade"
+        }
+        df = df.rename(columns=renomear)
         if "operador" in df.columns:
             df["operador"] = df["operador"].astype(str).str.strip()
 
