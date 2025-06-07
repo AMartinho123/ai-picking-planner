@@ -271,7 +271,7 @@ def gerar_relatorio_pdf(df, recomendacoes):
     pdf.set_font("Arial", size=12)
 
     pdf.set_font("Arial", 'B', 14)
-    pdf.cell(0, 10, txt=l["report_title"].format(date=data_hoje.strftime('%d/%m/%Y')), ln=True, align='C')), ln=True, align='C')
+    pdf.cell(0, 10, txt=l["report_title"].format(date=data_hoje.strftime('%d/%m/%Y')), ln=True, align='C')
     pdf.ln(10)
 
     pdf.set_font("Arial", 'B', 12)
