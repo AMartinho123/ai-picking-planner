@@ -215,6 +215,9 @@ df_exibicao = df_hoje.rename(columns={col: colunas_traduzidas.get(col, col) for 
 if df_hoje.empty:
     st.warning("Nenhum dado disponível com os filtros selecionados.")
 else:
+    st.write("🧪 Operadores únicos encontrados:", df["operador"].unique())
+    st.write("📊 Preview dos dados carregados:")
+    st.dataframe(df.head())
     st.dataframe(df_exibicao)
 
 # Métricas principais
