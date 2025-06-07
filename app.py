@@ -136,3 +136,60 @@ lang_code = st.sidebar.selectbox(
 
 l = langs[lang_code]
 st.title(l["title"])
+
+uploaded_file = st.file_uploader(l["upload_label"], type=["csv", "xlsx"])
+
+if uploaded_file is None:
+    st.info(l["no_file"])
+    df = pd.DataFrame({
+        "data": pd.date_range(start="2024-01-01", periods=10, freq="D"),
+        "operador": ["João", "Maria", "Ana", "Pedro", "Lucas"] * 2,
+        "pedidos": [30, 45, 40, 50, 35, 42, 38, 55, 44, 47],
+        "tempo_min": [60, 60, 55, 70, 50, 60, 58, 72, 65, 67],
+        "SLA_real": [98, 95, 96, 97, 94, 95, 96, 93, 97, 94],
+        "zona": ["A", "B", "A", "C", "B"] * 2
+    })
+else:
+    ext = uploaded_file.name.split(".")[-1].lower()
+    if ext == "csv":
+        df = pd.read_csv(uploaded_file)
+    else:
+        df = pd.read_excel(uploaded_file)
+
+if "data" in df.columns:
+    df["data"] = pd.to_datetime(df["data"])
+
+# Filtros interativos
+with st.expander("🔍 Filtrar dados"):
+    col_f1, col_f2, col_f3 = st.columns(3)
+    datas_disponiveis = df["data"].dt.date.unique() if "data" in df.columns else []
+    operadores_disponiveis = df["operador"].unique() if "operador" in df.columns else []
+    zonas_disponiveis = df["zona"].unique() if "zona" in df.columns else []
+
+    data_filtro = col_f1.selectbox("Data", options=sorted(datas_disponiveis), format_func=lambda x: x.strftime('%d/%m/%Y') if isinstance(x, datetime.date) else x)
+    operador_filtro = col_f2.multiselect("Operador", options=operadores_disponiveis, default=operadores_disponiveis)
+    zona_filtro = col_f3.multiselect("Zona", options=zonas_disponiveis, default=zonas_disponiveis)
+
+    df_hoje = df.copy()
+    df_hoje = df_hoje[df_hoje["data"].dt.date == data_filtro]
+    df_hoje = df_hoje[df_hoje["operador"].isin(operador_filtro)]
+    df_hoje = df_hoje[df_hoje["zona"].isin(zona_filtro)]
+
+    if "pedidos" in df_hoje.columns and "tempo_min" in df_hoje.columns:
+        df_hoje["produtividade"] = df_hoje["pedidos"] / df_hoje["tempo_min"]
+    else:
+        df_hoje["produtividade"] = 0
+
+# Tradução das colunas para exibição
+colunas_traduzidas = {
+    "operador": l.get("col_operator", "Operador"),
+    "produtividade": l.get("col_rate", "Pedidos por Minuto"),
+    "SLA_real": l.get("col_sla", "SLA (%)"),
+    "zona": "Zona",
+    "data": "Data",
+    "pedidos": "Pedidos",
+    "tempo_min": "Tempo (min)"
+}
+df_exibicao = df_hoje.rename(columns={col: colunas_traduzidas.get(col, col) for col in df_hoje.columns})
+
+st.dataframe(df_exibicao)
