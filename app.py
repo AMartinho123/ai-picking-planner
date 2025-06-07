@@ -143,7 +143,7 @@ if uploaded_file is None:
     st.info(l["no_file"])
     df = pd.DataFrame({
         "data": pd.date_range(start="2024-01-01", periods=10, freq="D"),
-        "operador": ["João", "Maria", "Ana", "Pedro", "Lucas"] * 2,
+        "operador": ["Joao", "Maria", "Ana", "Pedro", "Lucas"] * 2,
         "pedidos": [30, 45, 40, 50, 35, 42, 38, 55, 44, 47],
         "tempo_min": [60, 60, 55, 70, 50, 60, 58, 72, 65, 67],
         "SLA_real": [98, 95, 96, 97, 94, 95, 96, 93, 97, 94],
@@ -153,8 +153,14 @@ else:
     ext = uploaded_file.name.split(".")[-1].lower()
     if ext == "csv":
         df = pd.read_csv(uploaded_file)
+        df.columns = [col.strip().lower() for col in df.columns]
+        if "operador" in df.columns:
+            df["operador"] = df["operador"].astype(str).str.strip()
     else:
         df = pd.read_excel(uploaded_file)
+        df.columns = [col.strip().lower() for col in df.columns]
+        if "operador" in df.columns:
+            df["operador"] = df["operador"].astype(str).str.strip()
 
 if "data" in df.columns:
     df["data"] = pd.to_datetime(df["data"])
@@ -262,4 +268,5 @@ if not df_hoje.empty:
         return buffer
 
     pdf_buffer = gerar_relatorio_pdf(df_hoje, recomendacoes)
-    st.download_button(label=l["download_pdf"], data=pdf_buffer, file_name="relatorio.pdf", mime="application/pdf")
+    file_name = f"relatorio_{lang_code}_{data_filtro.strftime('%Y-%m-%d')}.pdf"
+    st.download_button(label=l["download_pdf"], data=pdf_buffer, file_name=file_name, mime="application/pdf")
