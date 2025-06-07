@@ -186,7 +186,11 @@ with st.expander("🔍 Filtrar dados"):
     operadores_disponiveis = df["operador"].unique() if "operador" in df.columns else []
     zonas_disponiveis = df["zona"].unique() if "zona" in df.columns else []
 
-    data_filtro = col_f1.selectbox("Data", options=['Todos'] + sorted(datas_disponiveis), format_func=lambda x: x.strftime('%d/%m/%Y') if isinstance(x, datetime.date) else x), format_func=lambda x: x.strftime('%d/%m/%Y') if isinstance(x, datetime.date) else x)
+    data_filtro = col_f1.selectbox(
+        "Data",
+        options=["Todos"] + sorted(datas_disponiveis),
+        format_func=lambda x: x.strftime("%d/%m/%Y") if isinstance(x, datetime.date) else x
+    ), format_func=lambda x: x.strftime('%d/%m/%Y') if isinstance(x, datetime.date) else x), format_func=lambda x: x.strftime('%d/%m/%Y') if isinstance(x, datetime.date) else x)
     operador_filtro = col_f2.multiselect("Operador", options=operadores_disponiveis, default=operadores_disponiveis)
     zona_filtro = col_f3.multiselect("Zona", options=zonas_disponiveis, default=zonas_disponiveis)
 
