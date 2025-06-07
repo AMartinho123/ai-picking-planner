@@ -206,10 +206,10 @@ else:
 # Métricas principais
 col1, col2 = st.columns(2)
 with col1:
-    total = df_hoje["pedidos"].sum() if "pedidos" in df_hoje else 0
+    total = df_hoje["pedidos"].sum() if "pedidos" in df_hoje.columns else 0
     st.metric(label=l["total_orders"], value=int(total))
 with col2:
-    sla = df_hoje["SLA_real"].mean() if "SLA_real" in df_hoje else 0
+    sla = df_hoje["SLA_real"].mean() if "SLA_real" in df_hoje.columns else 0
     st.metric(label=l["sla_avg"], value=f"{sla:.1f}%")
 
 # Gráfico de produtividade
@@ -249,9 +249,14 @@ if not df_hoje.empty:
         pdf.ln()
         pdf.set_font("Arial", '', 10)
         for _, row in df.iterrows():
-            pdf.cell(40, 10, str(row["operador"]))
-            pdf.cell(50, 10, f"{row['produtividade']:.2f}")
-            pdf.cell(40, 10, f"{row['SLA_real']:.1f}%")
+            op = row.get("operador", "")
+            pdf.cell(40, 10, str(op))
+            prod = row.get("produtividade", 0)
+            prod_text = f"{prod:.2f}" if isinstance(prod, (int, float)) else ""
+            pdf.cell(50, 10, prod_text)
+            sla = row.get("SLA_real", "")
+            sla_text = f"{sla:.1f}%" if isinstance(sla, (int, float)) else ""
+            pdf.cell(40, 10, sla_text)
             pdf.ln()
         pdf.ln(10)
         pdf.set_font("Arial", 'B', 10)
