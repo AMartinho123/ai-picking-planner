@@ -53,7 +53,6 @@ import streamlit as st
 import pandas as pd
 from prophet import Prophet
 import datetime
-
 st.title("Previsão de Picos de Trabalho")
 
 @st.cache_data
