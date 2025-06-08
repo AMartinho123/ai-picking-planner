@@ -13,13 +13,13 @@ st.title("Teste PDF")
 
 class PDF(FPDF):
     def header(self):
-        self.set_font("Arial", "B", 12)
+        self.set_font("Helvetica", "B", 12)
         self.cell(0, 10, "Relatório de Teste", ln=True, align="C")
 
 pdf = PDF()
 pdf.add_page()
 
-pdf.set_font("Arial", "", 10)
+pdf.set_font("Helvetica", "", 10)
 
 for rec in recomendacoes:
     texto_limpo = str(rec)
