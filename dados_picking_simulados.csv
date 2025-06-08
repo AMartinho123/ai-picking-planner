@@ -53,35 +53,4 @@ import streamlit as st
 import pandas as pd
 from prophet import Prophet
 import datetime
-st.title("Previsão de Picos de Trabalho")
 
-@st.cache_data
-def carregar_dados():
-    df = pd.read_csv('dados_picking_simulados.csv')
-    df['data'] = pd.to_datetime(df['data'])
-    return df
-
-df = carregar_dados()
-
-st.write("Dados carregados:")
-st.dataframe(df.head())
-
-# Preparar dados para Prophet
-df_pedidos_dia = df.groupby(df['data'].dt.date)['pedidos'].sum().reset_index()
-df_pedidos_dia.columns = ['ds', 'y']
-
-# Mostrar gráfico histórico
-st.subheader("Pedidos diários históricos")
-st.line_chart(df_pedidos_dia.set_index('ds')['y'])
-
-# Treinar modelo Prophet
-modelo = Prophet()
-modelo.fit(df_pedidos_dia)
-
-# Prever próximos 7 dias
-future = modelo.make_future_dataframe(periods=7)
-forecast = modelo.predict(future)
-
-# Mostrar previsão
-st.subheader("Previsão para os próximos 7 dias")
-st.line_chart(forecast.set_index('ds')['yhat'])
