@@ -1,8 +1,16 @@
 import streamlit as st
-from fpdf import FPDF
+import pandas as pd
+import datetime
+import plotly.express as px
 import io
-import unicodedata
-import re
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import mm
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.lib import colors
+
+st.set_page_config(page_title="Simplify", layout="wide")
 
 # Dados simulados para teste
 recomendacoes = [
@@ -11,36 +19,46 @@ recomendacoes = [
     "Operador C está acima da média."
 ]
 
-st.title("Teste PDF")
+st.title("Teste PDF com ReportLab")
 
-def limpar_texto(texto):
-    texto_normalizado = unicodedata.normalize('NFKD', texto)
-    texto_ascii = texto_normalizado.encode('ASCII', 'ignore').decode('ASCII')
-    texto_limpo = ''.join(ch for ch in texto_ascii if ch.isprintable())
-    texto_limpo = re.sub(r'(\S{30})(?=\S)', r'\1 ', texto_limpo)  # insere espaços em palavras muito longas
-    return texto_limpo
+def gerar_pdf_buffer(recomendacoes):
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=20*mm, leftMargin=20*mm, topMargin=20*mm, bottomMargin=20*mm)
+    styles = getSampleStyleSheet()
+    elements = []
 
-class PDF(FPDF):
-    def header(self):
-        self.set_font("Helvetica", "B", 12)
-        self.cell(0, 10, "Relatório de Teste", ln=True, align="C")
+    # Título
+    title_style = styles['Title']
+    elements.append(Paragraph("Relatório de Teste", title_style))
+    elements.append(Spacer(1, 12))
 
-pdf = PDF()
-pdf.add_page()
+    # Tabela de recomendações
+    data = [["Recomendações"]]
+    for rec in recomendacoes:
+        data.append([rec])
 
-pdf.set_font("Helvetica", "", 10)
+    table = Table(data, colWidths=[160*mm])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.grey),
+        ('TEXTCOLOR',(0,0),(-1,0),colors.whitesmoke),
+        ('ALIGN',(0,0),(-1,-1),'LEFT'),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 14),
+        ('BOTTOMPADDING', (0,0), (-1,0), 12),
+        ('BACKGROUND',(0,1),(-1,-1),colors.beige),
+        ('GRID', (0,0), (-1,-1), 1, colors.black),
+    ]))
+    elements.append(table)
 
-for rec in recomendacoes:
-    texto_limpo = limpar_texto(str(rec))
-    pdf.multi_cell(0, 10, texto_limpo, align='L')
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
 
-pdf_buffer = io.BytesIO()
-pdf.output(pdf_buffer)
-pdf_buffer.seek(0)
+pdf_buffer = gerar_pdf_buffer(recomendacoes)
 
 st.download_button(
     label="Baixar PDF de Teste",
     data=pdf_buffer,
-    file_name="teste_relatorio.pdf",
+    file_name="teste_relatorio_reportlab.pdf",
     mime="application/pdf"
 )
