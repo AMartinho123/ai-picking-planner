@@ -49,7 +49,10 @@ if uploaded_file is None:
     st.info(l["no_file"])
     df = pd.DataFrame({
         "data": pd.date_range(start="2024-01-01", periods=10, freq="D"),
-        "operador": ["Joao", "Maria", "Ana", "Pedro", "Lucas"] * 2,
+        "nome_completo": [
+            "Joao Silva", "Maria Santos", "Ana Costa", "Pedro Alves", "Lucas Oliveira",
+            "Joao Silva", "Maria Santos", "Ana Costa", "Pedro Alves", "Lucas Oliveira"
+        ],
         "pedidos": [30, 45, 40, 50, 35, 42, 38, 55, 44, 47],
         "tempo_min": [60, 60, 55, 70, 50, 60, 58, 72, 65, 67],
         "SLA_real": [98, 95, 96, 97, 94, 95, 96, 93, 97, 94],
@@ -65,13 +68,13 @@ else:
     df.columns = [col.strip().lower() for col in df.columns]
     renomear = {
         "sla_real": "SLA_real",
-        "operador": "operador",
+        "nome_completo": "nome_completo",
         "tempo_min": "tempo_min",
         "produtividade": "produtividade"
     }
     df = df.rename(columns=renomear)
-    if "operador" in df.columns:
-        df["operador"] = df["operador"].astype(str).str.strip()
+    if "nome_completo" in df.columns:
+        df["nome_completo"] = df["nome_completo"].astype(str).str.strip()
 
 if "data" in df.columns:
     df["data"] = pd.to_datetime(df["data"])
@@ -79,7 +82,7 @@ if "data" in df.columns:
 with st.expander("🔍 Filtrar dados"):
     col_f1, col_f2, col_f3 = st.columns(3)
     datas_disponiveis = df["data"].dt.date.unique() if "data" in df.columns else []
-    operadores_disponiveis = df["operador"].unique() if "operador" in df.columns else []
+    nomes_disponiveis = df["nome_completo"].unique() if "nome_completo" in df.columns else []
     zonas_disponiveis = df["zona"].unique() if "zona" in df.columns else []
 
     data_filtro = col_f1.selectbox(
@@ -87,11 +90,24 @@ with st.expander("🔍 Filtrar dados"):
         options=["Todos"] + sorted(datas_disponiveis),
         format_func=lambda x: x.strftime("%d/%m/%Y") if isinstance(x, datetime.date) else x
     )
+    nome_filtro = col_f2.multiselect(
+        "Operador",
+        options=nomes_disponiveis,
+        default=list(nomes_disponiveis)
+    )
+    zona_filtro = col_f3.multiselect(
+        "Zona",
+        options=zonas_disponiveis,
+        default=list(zonas_disponiveis)
+    )
 
+    df_hoje = df.copy()
     if data_filtro != "Todos":
-        df_hoje = df[df["data"].dt.date == data_filtro]
-    else:
-        df_hoje = df.copy()
+        df_hoje = df_hoje[df_hoje["data"].dt.date == data_filtro]
+    if nome_filtro:
+        df_hoje = df_hoje[df_hoje["nome_completo"].isin(nome_filtro)]
+    if zona_filtro:
+        df_hoje = df_hoje[df_hoje["zona"].isin(zona_filtro)]
 
 if "tempo_min" in df_hoje.columns and "pedidos" in df_hoje.columns:
     df_hoje["produtividade"] = df_hoje["pedidos"] / df_hoje["tempo_min"]
@@ -103,14 +119,14 @@ col1, col2 = st.columns(2)
 col1.metric(label=l["total_orders"], value=total_pedidos)
 col2.metric(label=l["sla_avg"], value=f"{sla_medio:.1f}%")
 
-if not df_hoje.empty and "operador" in df_hoje.columns and "produtividade" in df_hoje.columns:
-    fig = px.bar(df_hoje, x="operador", y="produtividade", color="operador", title=l["prod_title"])
+if not df_hoje.empty and "nome_completo" in df_hoje.columns and "produtividade" in df_hoje.columns:
+    fig = px.bar(df_hoje, x="nome_completo", y="produtividade", color="nome_completo", title=l["prod_title"])
     st.plotly_chart(fig, use_container_width=True)
 
 recomendacoes = []
 media_prod = df_hoje["produtividade"].mean() if "produtividade" in df_hoje.columns else 0
 for _, row in df_hoje.iterrows():
-    nome = row.get("operador", "?")
+    nome = row.get("nome_completo", "?")
     val = row.get("produtividade", 0) - media_prod
     if val < -0.5:
         recomendacoes.append(l["below_avg"].format(op=nome, val=abs(val)))
@@ -138,7 +154,7 @@ def gerar_relatorio_pdf(df_hoje, recomendacoes, l, data_filtro):
 
     data = [[l["col_operator"], l["col_rate"], l["col_sla"]]]
     for _, row in df_hoje.iterrows():
-        operador = str(row.get("operador", "-"))
+        operador = str(row.get("nome_completo", "-"))
         produtividade = f"{row.get('produtividade', 0):.2f}" if row.get('produtividade') is not None else "-"
         sla = f"{row.get('SLA_real', 0):.1f}%" if row.get('SLA_real') is not None else "-"
         data.append([operador, produtividade, sla])
